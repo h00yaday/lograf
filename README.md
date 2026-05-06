@@ -32,6 +32,10 @@ Lograf is built as a modular Go service composed of three core components:
 
 Components interact through in-memory channels, enabling a low-overhead, streaming pipeline while keeping the core service lean and modular.
 
+## Development and Contribution
+
+For AI agents and developers contributing to this project, refer to `Agents.md` for detailed guidelines, workflow, and strict rules (including OCP principles and testing requirements). This file ensures consistent code quality and architecture.
+
 ## Getting Started
 
 ### Prerequisites

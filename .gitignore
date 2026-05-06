@@ -1,0 +1,65 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+Agents.md
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Build artifacts and compiled binaries
+bin/lograf
+bin/*.out
+
+# Test coverage
+coverage.out
+coverage.html
+*.coverprofile
+
+# Docker and development environment
+docker-compose.yml
+docker-compose.*.yml
+.env
+.env.local
+.env.*.local
+
+# Development directories
+tmp/
+temp/
+logs/
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Test data and fixtures
+testdata/
+fixtures/
+
+# Development configuration files
+config.yml
+config.yaml
+config.*.yml
+config.*.yaml
