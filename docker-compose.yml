@@ -1,19 +1,19 @@
-version: '3.8'
-
 services:
   log-spammer:
     image: python:3.9-slim
-    command: >
-      python -c "
-      import time
-      import random
-      import sys
-      levels = ['INFO', 'ERROR', 'PANIC', 'DEBUG']
-      while True:
-          level = random.choice(levels)
-          print(f'{time.time()} {level} Random log message {random.randint(1, 1000)}')
-          sys.stdout.flush()
-          time.sleep(0.1)
-      "
+    command:
+      - python
+      - -c
+      - |
+        import time
+        import random
+        import sys
+        
+        levels = ['INFO', 'ERROR', 'PANIC', 'DEBUG']
+        while True:
+            level = random.choice(levels)
+            print(f'{time.time()} {level} Random log message {random.randint(1, 1000)}')
+            sys.stdout.flush()
+            time.sleep(0.1)
     labels:
       - "com.docker.compose.service=log-spammer"

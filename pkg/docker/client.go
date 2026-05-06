@@ -6,13 +6,20 @@ import (
 	"log"
 
 	"lograf/internal/models"
+	"lograf/pkg/streamer"
 
 	"github.com/moby/moby/client"
 )
 
+// DockerAPI describes the subset of Docker client operations used by the app.
+type DockerAPI interface {
+	ContainerList(ctx context.Context, options client.ContainerListOptions) (client.ContainerListResult, error)
+	Close() error
+}
+
 // Client wraps the Docker client.
 type Client struct {
-	cli *client.Client
+	cli DockerAPI
 }
 
 // NewClient creates a new Docker client.
@@ -24,9 +31,9 @@ func NewClient() (*Client, error) {
 	return &Client{cli: cli}, nil
 }
 
-// GetClient returns the underlying Docker client.
-func (c *Client) GetClient() *client.Client {
-	return c.cli
+// GetClient returns the underlying Docker client as a log reader.
+func (c *Client) GetClient() streamer.ContainerLogReader {
+	return c.cli.(streamer.ContainerLogReader)
 }
 
 // GetContainers fetches active containers with docker-compose labels.

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,15 +15,20 @@ import (
 	"github.com/moby/moby/client"
 )
 
+// ContainerLogReader describes the subset of Docker client calls used by the streamer.
+type ContainerLogReader interface {
+	ContainerLogs(ctx context.Context, containerID string, options client.ContainerLogsOptions) (client.ContainerLogsResult, error)
+}
+
 // LogStreamer handles streaming logs from containers.
 type LogStreamer struct {
-	cli        *client.Client
+	cli        ContainerLogReader
 	filter     *regexp.Regexp
 	bufferPool *sync.Pool
 }
 
 // NewLogStreamer creates a new LogStreamer with a regex filter.
-func NewLogStreamer(cli *client.Client, filterPattern string) (*LogStreamer, error) {
+func NewLogStreamer(cli ContainerLogReader, filterPattern string) (*LogStreamer, error) {
 	filter, err := regexp.Compile(filterPattern)
 	if err != nil {
 		return nil, fmt.Errorf("invalid regex pattern: %w", err)
@@ -114,14 +120,39 @@ func (s *LogStreamer) streamContainerLogs(ctx context.Context, container models.
 // parseLogLine parses a raw log line into a LogEntry.
 // This is a basic parser; assumes format like "2023-01-01T00:00:00Z INFO message"
 func (s *LogStreamer) parseLogLine(container models.ContainerInfo, line string) models.LogEntry {
-	// Simple parsing; in real app, use more robust parsing
 	entry := models.LogEntry{
 		ContainerID: container.ID,
 		Service:     container.Service,
 		Raw:         line,
-		Timestamp:   time.Now(), // Placeholder; parse from log if available
-		Level:       "INFO",     // Placeholder
+		Timestamp:   time.Now(),
+		Level:       "INFO",
 		Message:     line,
+	}
+
+	parts := strings.Fields(line)
+	if len(parts) == 0 {
+		return entry
+	}
+
+	if len(parts) == 1 {
+		entry.Message = line
+		return entry
+	}
+
+	if parsedTime, err := time.Parse(time.RFC3339, parts[0]); err == nil {
+		entry.Timestamp = parsedTime
+		entry.Level = parts[1]
+		prefix := parts[0] + " " + parts[1] + " "
+		if strings.HasPrefix(line, prefix) {
+			entry.Message = strings.TrimPrefix(line, prefix)
+		}
+		return entry
+	}
+
+	entry.Level = parts[0]
+	prefix := parts[0] + " "
+	if strings.HasPrefix(line, prefix) {
+		entry.Message = strings.TrimPrefix(line, prefix)
 	}
 	return entry
 }
